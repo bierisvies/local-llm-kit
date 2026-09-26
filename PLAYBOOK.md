@@ -22,6 +22,11 @@ Never trade (1)–(3) for extra speed above the floor.
 Before installing anything, ask:
 1. "Is there already a local model on this PC (a .gguf file, llama.cpp, Ollama, LM Studio) that should be tuned instead of replaced?"
 2. If yes: its path (and the mmproj/vision file if any) and whether an existing `llama-server.exe` should be kept.
+3. "Should other PCs on your network be able to use this model?" Only if yes: `-Network` (API key + firewall rule).
+   `add-remote.ps1` is only for PCs that should *use* another PC's model; skip it otherwise.
+4. "Is OpenCode already installed/configured here?" The kit's agent setup is always applied, but merged
+   (`opencode-apply.ps1`): existing providers, MCP servers, permissions and the user's own AGENTS.md are kept
+   (their prompt becomes `AGENTS.user.md`, still loaded). A full backup is made first.
 
 Then:
 - **Existing model + llama.cpp** → `.\setup.ps1 -ModelPath <gguf> [-MmprojPath <mmproj>] -LlamaServerExe <exe>` (no download, no build), then `tune.ps1`, then bench.
@@ -61,7 +66,7 @@ Only `qwen36-35b` is measured; the others use llama.cpp's automatic `--fit`. `be
 
 ```powershell
 .\setup.ps1                           # local only; profile auto-selected with the §2 rule
-.\setup.ps1 -Network                  # also serve the LAN (API key + firewall rule, LocalSubnet only)
+.\setup.ps1 -Network                  # only if the user wants other PCs to use it (API key + firewall rule, LocalSubnet only)
 .\setup.ps1 -Profile qwen38-27b       # force a profile (e.g. step down after a failed bench)
 ```
 Elevated PowerShell 7. It installs Git, CMake, Python, Node, gh, CUDA, VS Build Tools (C++), builds llama.cpp at
@@ -105,6 +110,8 @@ Reference PC: 512k passed at 17.4 tok/s but cold prefill took 22 min, so 384k (2
 - **MemPalace-style memory plugins**: injecting varying memory at the top of the prompt breaks llama.cpp's prompt cache (every turn re-prefills).
 - **Lower OpenCode context limit to force early compaction**: user declined; keep 393k.
 
+OpenCode-only PC (uses another PC's model): `.\opencode-apply.ps1 -SkipModel`, then `add-remote.ps1`.
+
 To update llama.cpp (needed for `qwen38-flash-next`): `git -C $HOME\local-llm\llama.cpp checkout master; git pull`,
 delete `build\`, re-run `setup.ps1` (edit `$LlamaCommit` first), then `bench.ps1` again.
 
@@ -120,7 +127,7 @@ delete `build\`, re-run `setup.ps1` (edit `$LlamaCommit` first), then `bench.ps1
 - **Thinking high, budget 32k**: quality over speed was the explicit choice.
 - **`-np 1`**: one request at a time, full context. Several LAN users will queue. `-np 2` halves the context per slot.
 
-## 8. OpenCode agent config (copied to `~/.config/opencode` by setup) — full detail in `AGENT.md`
+## 8. OpenCode agent config (merged into `~/.config/opencode` by `opencode-apply.ps1`, called from setup) — full detail in `AGENT.md`
 
 - `AGENTS.md`: system prompt. Key rules, each added after a real failure: static checks after every edit;
   build in small steps (no 300+ line files, no whole-file rewrites); look up the installed library API before coding

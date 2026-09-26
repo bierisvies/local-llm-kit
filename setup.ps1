@@ -161,23 +161,10 @@ $taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopI
 Register-ScheduledTask -TaskName 'Local LLM server' -Action $action -Trigger $trigger -Settings $taskSettings -Force | Out-Null
 
 if (-not $SkipOpenCode) {
-  Step 'Installing OpenCode + agent tooling'
-  npm install -g '@opencode/cli@2.0.16'
-  python -m pip install --quiet --upgrade pillow
-  $oc = Join-Path $HOME '.config\opencode'
-  if (Test-Path (Join-Path $oc 'opencode.json')) {
-    $backup = "$oc.backup-$(Get-Date -Format yyyyMMdd-HHmmss)"
-    Copy-Item $oc $backup -Recurse; Write-Host "  existing config backed up to $backup"
-  }
-  New-Item -ItemType Directory -Force $oc | Out-Null
-  Copy-Item (Join-Path $Kit 'opencode\*') $oc -Recurse -Force
-  # Point the OpenCode config at the chosen profile's model.
-  $ocCfg = Get-Content (Join-Path $oc 'opencode.json') -Raw | ConvertFrom-Json -AsHashtable
-  $m = $ocCfg.provider.local.models['qwen36-35-q4km']; $ocCfg.provider.local.models.Remove('qwen36-35-q4km')
-  $m.name = "$($P.alias) (this PC)"; $m.limit.context = $Context
-  if (-not $mmproj) { $m.Remove('attachment'); $m.modalities.input = @('text') }
-  $ocCfg.provider.local.models[$P.alias] = $m; $ocCfg.model = "local/$($P.alias)"
-  $ocCfg | ConvertTo-Json -Depth 10 | Set-Content (Join-Path $oc 'opencode.json') -Encoding utf8
+  Step 'Applying the OpenCode agent setup (merged into any existing config)'
+  $applyArgs = @{ Alias = $P.alias; Context = $Context; BaseUrl = "http://127.0.0.1:$Port/v1" }
+  if (-not $mmproj) { $applyArgs.NoVision = $true }
+  & (Join-Path $Kit 'opencode-apply.ps1') @applyArgs
 }
 
 Step 'Starting the server'
