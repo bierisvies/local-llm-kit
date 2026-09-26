@@ -23,6 +23,10 @@ $llamaArgs += @(
   # Qwen's recommended sampling for coding with thinking.
   '--temp', '0.6', '--top-p', '0.95', '--top-k', '20', '--min-p', '0', '--presence-penalty', '0', '--repeat-penalty', '1.0'
 )
+# Free VRAM/RAM when idle; the next request reloads the model (~5 s). The patched llama.cpp keeps the
+# conversation state in the RAM prompt cache during sleep, so a resumed session does not re-read its context.
+$sleep = if ($cfg.PSObject.Properties['sleepIdleSeconds']) { [int]$cfg.sleepIdleSeconds } else { 600 }
+if ($sleep -gt 0) { $llamaArgs += @('--sleep-idle-seconds', "$sleep") }
 if ($cfg.apiKey) { $llamaArgs += @('--api-key', $cfg.apiKey) }
 
 & $cfg.exe @llamaArgs *>> $cfg.log

@@ -125,6 +125,12 @@ delete `build\`, re-run `setup.ps1` (edit `$LlamaCommit` first), then `bench.ps1
 - **KV cache is tiny** because only 10 of 40 layers use full attention (the rest are linear/DeltaNet with fixed state) and there are 2 KV heads.
 - **YaRN 1.5×** stretches the trained 262k to 393k; the 376k needle test passed.
 - **Thinking high, budget 32k**: quality over speed was the explicit choice.
+- **Idle sleep** (`sleepIdleSeconds`, default 600): after 10 idle minutes llama-server unloads the model
+  (VRAM 11.1 → 1.4 GB, RAM 7.8 → 1.2 GB) so games etc. get the GPU back; the next request reloads it (~5 s).
+  Stock llama.cpp wipes the prompt cache on wake, so a resumed 52k session re-read everything (61 s).
+  `patches/keep-prompt-cache-on-sleep.patch` (applied by setup) keeps it in RAM: the same turn after sleep took 6 s.
+  Qwen3.6 is hybrid (recurrent layers), so a saved slot file (`--slot-save-path`) is NOT enough: it lacks the
+  checkpoints needed to reuse a prefix. The in-RAM prompt cache has them. Set 0 to keep the model always loaded.
 - **`-np 1`**: one request at a time, full context. Several LAN users will queue. `-np 2` halves the context per slot.
 
 ## 8. OpenCode agent config (merged into `~/.config/opencode` by `opencode-apply.ps1`, called from setup) — full detail in `AGENT.md`

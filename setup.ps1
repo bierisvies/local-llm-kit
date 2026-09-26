@@ -22,7 +22,8 @@ param(
   # Tune an EXISTING setup instead of downloading/building (ask the user first, see PLAYBOOK §1):
   [string]$ModelPath,                  # existing .gguf (first shard for split models); skips the download
   [string]$MmprojPath,                 # existing vision projector for that model (optional)
-  [string]$LlamaServerExe              # existing llama-server.exe; skips cloning/building llama.cpp
+  [string]$LlamaServerExe,             # existing llama-server.exe; skips cloning/building llama.cpp
+  [int]$SleepIdleSeconds = 600         # unload the model after this many idle seconds (0 = always loaded)
 )
 $ErrorActionPreference = 'Stop'
 $Kit = $PSScriptRoot
@@ -88,6 +89,10 @@ $llama = Join-Path $Root 'llama.cpp'
 if (-not (Test-Path $llama)) { git clone https://github.com/ggml-org/llama.cpp $llama }
 git -C $llama fetch --quiet origin
 git -C $llama checkout --quiet $LlamaCommit
+# Local patch: keep the conversation state in the RAM prompt cache while the server sleeps (see patches\).
+$patch = Join-Path $Kit 'patches\keep-prompt-cache-on-sleep.patch'
+git -C $llama apply --check $patch 2>$null
+if ($LASTEXITCODE -eq 0) { git -C $llama apply $patch; Remove-Item (Join-Path $llama 'build\bin\Release\llama-server.exe') -ErrorAction SilentlyContinue }
 $server = Join-Path $llama 'build\bin\Release\llama-server.exe'
 if (-not (Test-Path $server)) {
   cmake -S $llama -B (Join-Path $llama 'build') -DGGML_CUDA=ON -DLLAMA_CURL=OFF
@@ -147,7 +152,7 @@ $settings = [ordered]@{
   profile = $Profile; alias = $P.alias
   exe = $server; model = $model; mmproj = $mmproj; host = $hostAddr; port = "$Port"
   ncmoe = $(if ($NcMoe -ge 0) { "$NcMoe" } else { '' }); context = "$Context"; trainContext = "$($P.trainContext)"
-  threads = "$threads"; apiKey = $ApiKey
+  threads = "$threads"; apiKey = $ApiKey; sleepIdleSeconds = "$SleepIdleSeconds"
   log = Join-Path $Root 'llama-server.log'
 }
 $settings | ConvertTo-Json | Set-Content (Join-Path $Kit 'server\settings.json') -Encoding utf8
