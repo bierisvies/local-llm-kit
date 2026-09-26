@@ -25,6 +25,7 @@ Or open Claude Code in this folder and say "set this PC up": `CLAUDE.md` points 
 | `bench.ps1` | 5–10 min acceptance test: speed, 100k needle, vision, VRAM spill (`-Full` = full context) |
 | `bench-agent.ps1` | Checks the OpenCode agent: tools work, system-prompt rules are followed |
 | `opencode-apply.ps1` | Applies the agent setup (prompt, plugins, tools, MCP, sampling, model), merged into an existing OpenCode config; `-SkipModel` for OpenCode-only PCs |
+| `server\install-pause-controls.ps1` | Desktop shortcuts to pause/resume the local model, and automatic pause while a game runs |
 | `add-remote.ps1` | Adds another PC's server to OpenCode |
 | `opencode\` | System prompt (AGENTS.md), config, cleanup plugin, input driver, design skill |
 | `PLAYBOOK.md` | Everything learned: goal, what to pick, what to tune, what not to try, and why |

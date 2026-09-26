@@ -1,5 +1,7 @@
 # Starts llama-server with the profile chosen by setup.ps1. Values come from server\settings.json.
 # No 'Stop' error preference: llama-server logs to stderr, which Windows PowerShell 5.1 would treat as a fatal error.
+# Paused via llm-control.ps1 (desktop shortcut or game-watch.ps1): don't start.
+if (Test-Path (Join-Path $env:LOCALAPPDATA 'local-llm\paused.flag')) { exit 0 }
 $cfg = Get-Content (Join-Path $PSScriptRoot 'settings.json') -Raw | ConvertFrom-Json
 
 $llamaArgs = @('-m', $cfg.model, '--alias', $cfg.alias, '--host', $cfg.host, '--port', $cfg.port, '-ngl', 'all', '-fa', 'on')
