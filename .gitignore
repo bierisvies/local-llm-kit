@@ -1,0 +1,5 @@
+# Machine-specific: written by setup.ps1 / tune.ps1
+server/settings.json
+*.log
+*.drive.log
+__pycache__/

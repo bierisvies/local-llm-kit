@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/v2/cli.json",
+  "theme": {
+    "mode": "dark"
+  },
+  "animations": true,
+  "session": {
+    "scrollbar": true,
+    "thinking": "show",
+    "markdown": "rendered",
+    "grouping": "auto",
+    "permissions": "autoaccept"
+  },
+  "tabs": {
+    "mode": "on"
+  }
+}

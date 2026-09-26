@@ -1,0 +1,59 @@
+{
+  "_comment": "Model profiles for setup.ps1 -Profile <name>. 'split' holds measured sizes (GiB) used to compute -ncmoe; profiles without it use llama.cpp's automatic --fit. 'tested' = benchmarked on the reference PC (RTX 4070 12 GB, Ryzen 7 7700X, 64 GB DDR5).",
+  "qwen36-35b": {
+    "tested": true,
+    "description": "Default. Qwen3.6-35B-A3B UD-Q4_K_M (MoE, 3B active). 12+ GB VRAM, 32+ GB RAM.",
+    "repo": "unsloth/Qwen3.6-35B-A3B-GGUF",
+    "files": "^Qwen3\\.6-35B-A3B-UD-Q4_K_M\\.gguf$",
+    "mmproj": "mmproj-F16.gguf",
+    "alias": "qwen36-35-q4km",
+    "context": 393216,
+    "trainContext": 262144,
+    "split": {
+      "layers": 40,
+      "expertLayer": 0.456,
+      "nonExpert": 2.4,
+      "kvPer384k": 2.1
+    }
+  },
+  "qwen36-35b-small": {
+    "tested": false,
+    "description": "Same model, UD-IQ3_XXS (13.2 GB). For 8 GB VRAM and/or 16-24 GB RAM. Lower quality than Q4.",
+    "repo": "unsloth/Qwen3.6-35B-A3B-GGUF",
+    "files": "^Qwen3\\.6-35B-A3B-UD-IQ3_XXS\\.gguf$",
+    "mmproj": "mmproj-F16.gguf",
+    "alias": "qwen36-35-iq3",
+    "context": 131072,
+    "trainContext": 262144
+  },
+  "qwen36-35b-q8": {
+    "tested": false,
+    "description": "Same model, UD-Q8_K_XL (38.5 GB): near-lossless. For 24 GB VRAM + 64 GB RAM.",
+    "repo": "unsloth/Qwen3.6-35B-A3B-GGUF",
+    "files": "^Qwen3\\.6-35B-A3B-UD-Q8_K_XL\\.gguf$",
+    "mmproj": "mmproj-F16.gguf",
+    "alias": "qwen36-35-q8",
+    "context": 393216,
+    "trainContext": 262144
+  },
+  "qwen38-27b": {
+    "tested": false,
+    "description": "Qwen3.8-27B dense UD-Q4_K_M (16.5 GB). Preferred on 24 GB+ GPUs: fits fully in VRAM, stronger than Qwen3.6 (TB4 6% vs 0%). Too slow if it doesn't fit (~4 tok/s).",
+    "repo": "unsloth/Qwen3.8-27B-GGUF",
+    "files": "^Qwen3\\.8-27B-UD-Q4_K_M\\.gguf$",
+    "mmproj": "mmproj-F16.gguf",
+    "alias": "qwen38-27-q4km",
+    "context": 131072,
+    "trainContext": 262144
+  },
+  "qwen38-flash-next": {
+    "tested": false,
+    "description": "Best model: Qwen3.8-Flash-Next UD-Q3_K_XL (~90 GB, 3 shards), 6B active. For 128 GB RAM / unified memory. TB4 25%. Needs a llama.cpp new enough for arch 'qwen4exp'.",
+    "repo": "unsloth/Qwen3.8-Flash-Next-GGUF",
+    "files": "^UD-Q3_K_XL/Qwen3\\.8-Flash-Next-UD-Q3_K_XL-\\d{5}-of-\\d{5}\\.gguf$",
+    "mmproj": "mmproj-F16.gguf",
+    "alias": "qwen38-flash-next",
+    "context": 262144,
+    "trainContext": 262144
+  }
+}
