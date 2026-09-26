@@ -131,6 +131,8 @@ delete `build\`, re-run `setup.ps1` (edit `$LlamaCommit` first), then `bench.ps1
   `patches/keep-prompt-cache-on-sleep.patch` (applied by setup) keeps it in RAM: the same turn after sleep took 6 s.
   Qwen3.6 is hybrid (recurrent layers), so a saved slot file (`--slot-save-path`) is NOT enough: it lacks the
   checkpoints needed to reuse a prefix. The in-RAM prompt cache has them. Set 0 to keep the model always loaded.
+  Upstream fix: https://github.com/ggml-org/llama.cpp/pull/29408 (same approach, verified to give the same 6 s resume).
+  Once it is merged, update llama.cpp past it and drop the patch.
 - **`-np 1`**: one request at a time, full context. Several LAN users will queue. `-np 2` halves the context per slot.
 
 ## 8. OpenCode agent config (merged into `~/.config/opencode` by `opencode-apply.ps1`, called from setup) — full detail in `AGENT.md`
